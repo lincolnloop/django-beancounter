@@ -3,9 +3,9 @@
 
 {% block stylesheet %}{% load adminmedia %}{% admin_media_prefix %}css/dashboard.css{% endblock %}
 {% block extrahead %}
-<link rel="stylesheet" href="{{ MEDIA_URL }}css/style.css" type="text/css" media="screen" charset="utf-8">
-<script src="{{ MEDIA_URL }}js/swfobject.js" type="text/javascript"></script>
-<script src="{{ MEDIA_URL }}js/jquery.js" type="text/javascript"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}beancounter/js/jquery.flot.pack.js"></script>
+<link rel="stylesheet" href="{{ MEDIA_URL }}beancounter/css/style.css" type="text/css" media="screen" charset="utf-8" />
 <script type="text/javascript" charset="utf-8">
     function max(list){
         return Math.max.apply(Math, list);
@@ -14,53 +14,10 @@
     function min(list){
         return Math.min.apply(Math, list);
     };
-
-    var colours = ['#121C2D','#243859','#355386','#3C5E97','#476FB2','#7593C6','#A4B8D9','#D1DBEC']
-    var flashvars = {
-        variables: "true",
-        title: "Bottom+Line,{font-size: 20px;}",
-        bg_colour: "#ffffff",
-        x_axis_colour: '#aaaaaa',
-        y_axis_colour: '#aaaaaa',
-        y_grid_colour: '#eeeeee',
-        x_grid_colour: '#eeeeee',
-        y_ticks: "5,10,6",
-        colours: colours.join(','),
-    }
-    function get_data(table_id, options) {
-        var rows = $('#'+table_id+' tbody tr');
-        var labels = [];
-        var values = [];
-        rows.each(function(r){
-            labels[r] = $(this).children('.label').text();
-            values[r] = $(this).children('.value').text();
-        });
-        var fv = flashvars;
-        fv.values = values.toString();
-        fv.x_labels = labels.toString();
-        fv.tool_tip = '%23x_label%23<br>$%23val%23';
-        if (options) {
-            if (options.graph == 'pie') {
-                fv.pie_labels = labels.toString();
-                fv.pie = '90,#ffffff,#333333';
-            }
-            else if (options.graph == 'bar') {
-                fv.y_axis_steps = '10';
-                
-                fv.y_max = String(max(values));
-                fv.filled_bar = '70,#2a4269,#ffffff';
-                fv.tool_tip = '$%23val%23';
-            }
-        }
-        return fv;
-    }
-    function do_graph(html_id, fv) {
-        swfobject.embedSWF("{{ MEDIA_URL }}swf/open-flash-chart.swf", html_id, "500", "300", "9.0.0","expressInstall.swf", fv, {}, {});
-    }
 </script>
 {% endblock %}
 {% block branding %}<h1 style="float:left;">Bean Counter Reports</h1>
-<a href="/" style="padding:12px; display:block;">&larr; Back to admin</a>
+<a href="/admin/" style="padding:12px; display:block;">&larr; Back to admin</a>
 {% endblock %}
 {% block nav-global %}{% endblock %}
 

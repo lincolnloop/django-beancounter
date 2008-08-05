@@ -1,9 +1,11 @@
 from django.template import Context, loader, RequestContext
 from django.db.models import Q
 import datetime
+import decimal
 from beancounter.models import *
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.views.generic import simple
 from django.utils.datastructures import SortedDict
 from django.contrib.auth.decorators import login_required
     
@@ -58,32 +60,36 @@ def sortby(nlist, n):
 def detail_for_type(month,year,cat_type):
     """Get list of each category total for a given category type."""
     categories = Category.objects.filter(type__exact=cat_type)
-    type_total = 0.00
-    summary = []
+    type_total = 0
+    category_list = []
     (report_start,report_end) = build_dates(month,year)
-    for c in categories:
-        entries = Entry.objects.filter(date__gte=report_start, date__lt=report_end, category=c)
-        cat_total = 0.00
-        for e in entries:
-            cat_total += float(e.amount)
-        summary.append({
-            'category': c,
-            'total': cat_total
-            })    
+    entries = Entry.objects.filter(
+                    date__gte=report_start, 
+                    date__lt=report_end, 
+                    category__type=cat_type).order_by('category')
+    try:
+        this_cat = entries[0].category
+    except IndexError:
+        return [], 0
+    print entries
+    cat_total = 0
+    for e in entries:
+        if this_cat == e.category:
+            cat_total += e.amount
+        else:
+            category_list.append({'category': e.category, 'total': cat_total})
+            this_cat = e.category    
         type_total += cat_total
-    sortby(summary,'total')
-    return summary,type_total
+    sortby(category_list,'total')
+    return category_list,type_total
     
 
     
 @login_required
 def overview(request):
-    try:
-        month = int(request.GET['month'])
-        year = int(request.GET['year'])
-    except KeyError:
-        month = datetime.date.today().month
-        year = datetime.date.today().year
+    today = datetime.date.today()
+    month = int(request.GET.get('month', today.month))
+    year = int(request.GET.get('year', today.year))
     
     (monthOptions,yearOptions) = htmlDates(month,year)
     
@@ -92,45 +98,37 @@ def overview(request):
     expense_list,expense = detail_for_type(month, year,"EXP")
     
     cogs_plus_expense = cogs + expense
-    net = "%.2f" % (income-cogs_plus_expense)
-    title = "Overview"
+    net = decimal.Decimal(str(income-cogs_plus_expense))
     return render_to_response('beancounter/overview.html', locals(),context_instance=RequestContext(request))
 
 
 @login_required
 def history(request):
+    """
+    Tally total expenses and income for each month
+    """
     history = SortedDict()
-    amount = 0.00
-    this_month = -1
-    expenses = Entry.objects.filter(Q(category__type = 'EXP') | Q(category__type = 'COGS')).order_by('date')
-    for e in expenses:
-        month = datetime.date(e.date.year, e.date.month, 1)
-        if not month == this_month:
-            if amount:
-                history[this_month] = {'expense':amount, 'income':0}
-            this_month = month
-            amount = 0
-        amount += float(e.amount)
-    history[this_month] = {'expense':amount, 'income':0}
+    entries = Entry.objects.all().order_by('date')
+    for e in entries:
+        
+        # Create dict key
+        this_month = datetime.date(e.date.year, e.date.month, 1)
+        if not history.has_key(this_month):
+            history[this_month] = {'income':0, 'expense':0}
+            
+        #sum values for month
+        if e.category.type in ['EXP', 'COGS']:
+            history[this_month]['expense'] = e.amount + history[this_month]['expense']
+        elif e.category.type == 'INC':
+             history[this_month]['income'] += e.amount
+
     
-    
-    income_list = []
-    amount = 0.00
-    this_month = -1
-    incomes = Entry.objects.filter(category__type = 'INC').order_by('date')
-    for i in incomes:
-        month = datetime.date(i.date.year, i.date.month, 1)
-        if not month == this_month:
-            if amount:
-                history[this_month]['income'] = amount
-            this_month = month
-            amount = 0
-        amount += float(i.amount)
-    history[this_month]['income'] = amount
-    for d,v in history.items():
-        v['net'] = v['income'] - v['expense']
-    title = 'History'
-    return render_to_response('beancounter/history.html',locals(),context_instance=RequestContext(request))
+    for date, value_dict in history.items():
+        value_dict['net'] = value_dict['income'] - value_dict['expense']
+
+    return simple.direct_to_template(request,
+                                     template='beancounter/history.html',
+                                     extra_context = { 'history': history })
         
 @login_required
 def income_vs_cost(request):
@@ -181,7 +179,7 @@ def income_vs_cost(request):
     return render_to_response('beancounter/incomevscost.html',locals(),context_instance=RequestContext(request))
                 
 @login_required
-def moneyin_moneyoutMoneyOut(request):
+def moneyin_moneyout(request):
     try:
         theMonth = int(request.GET['month'])
         theYear = int(request.GET['year'])

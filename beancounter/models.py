@@ -77,7 +77,7 @@ class Entry(models.Model):
     category = models.ForeignKey(Category)
     date = models.DateField()
     name = models.ForeignKey(Person)
-    amount = models.FloatField()
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
     bank_account = models.ForeignKey(BankAccount,related_name='paid_from',null=True,blank=True)
     memo = models.CharField(max_length=100,null=True,blank=True)
     
