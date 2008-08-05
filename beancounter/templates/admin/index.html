@@ -48,27 +48,49 @@
 
 {% block sidebar %}
 <div id="content-related">
+    
+    
+<div class="module">
+    <table summary="">
+        <caption>
+            Beancounter Reports
+        </caption>
+        <tr>
+            <th scope="row">
+                <a href="{% url beancounter_overview %}" id="overview-report" name="overview-report">Overview</a><br />
+                <span class="mini quiet">What is the bottom line? How much did I spend in each category?</span>
+            </th>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <a href="{% url beancounter_history %}" id="history-report" name="history-report">History</a><br />
+                <span class="mini quiet">Income vs. Expenses over time.</span></a>
+            </th>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <a href="{% url beancounter_income_cost %}" id="income-vs-cost-report" title="Income vs. Cost of Goods Sold" name="income-vs-cost-report">Income vs. Cost of Goods Sold</a><br />
+                <span class="mini quiet">How much money do I make from the goods I sell?</span>
+            </th>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <th scope="row">
+                <a href="{% url beancounter_inout %}" id="moneyin-vs-moneyout-report" title="Money In/Money Out" name="moneyin-vs-moneyout-report">Money In/Money Out</a><br />
+                <span class="mini quiet">Who's paying me? Who am I paying?</span>
+            </th>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+    </table>
+</div>
 
-<div class="module">        <table summary="">        <caption>Reports</caption>
-            <tr>
-                <th scope="row"><a href="/overview/" id="overview-report">Overvi
-ew</a><br /><span class="mini quiet">What is the bottom line? How much did I spend in each category?</span></th> <td>&nbsp;</td> <td>&nbsp;</td>                        </tr>                        <tr>
-                <th scope="row"><a href="/history/" id="history-report">History<
-/a><br /><span class="mini quiet">Income vs. Expenses over time.</span></th> <td
->&nbsp;</td> <td>&nbsp;</td>                        </tr>                        <tr>                                <th scope="row"><a href="/income-vs-cost/" id="i
-ncome-vs-cost-report" title="Income vs. Cost of Goods Sold">Income vs. Cost of G
-oods Sold</a><br /><span class="mini quiet">How much money do I make from the go
-ods I sell?</span></th> <td>&nbsp;</td> <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                                <th scope="row"><a href="/moneyin-moneyout/" id=
-"moneyin-vs-moneyout-report" title="Money In/Money Out">Money In/Money Out</a><b
-r /><span class="mini quiet">Who's paying me? Who am I paying?</span></th> <td>&
-nbsp;</td> <td>&nbsp;</td>
-                        </tr>
-        </table>
-     </div>
-
+<!-- End Beancounter Changes -->
 
 
     <div class="module" id="recent-actions-module">

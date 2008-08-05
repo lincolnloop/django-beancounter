@@ -133,7 +133,7 @@ def history(request):
     return render_to_response('beancounter/history.html',locals(),context_instance=RequestContext(request))
         
 @login_required
-def incomeVsCost(request):
+def income_vs_cost(request):
     try:
         theMonth = int(request.GET['month'])
         theYear = int(request.GET['year'])
@@ -181,7 +181,7 @@ def incomeVsCost(request):
     return render_to_response('beancounter/incomevscost.html',locals(),context_instance=RequestContext(request))
                 
 @login_required
-def moneyInMoneyOut(request):
+def moneyin_moneyoutMoneyOut(request):
     try:
         theMonth = int(request.GET['month'])
         theYear = int(request.GET['year'])

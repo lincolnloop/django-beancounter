@@ -1,8 +1,8 @@
-{% extends "beancounter/generic-report.html" %}
+{% extends "beancounter/base.html" %}
 {% block title %}Income vs. Cost Report | Bean Counter {% endblock %}
 {% block content %}
 <div id="content-main">
-<form action="./" method="get">
+<form action="." method="get">
     Month/Year: <select name="month">
         {{ monthOptions|safe }}
     </select>/<select name="year">
