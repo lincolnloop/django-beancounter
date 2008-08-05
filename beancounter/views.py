@@ -94,7 +94,7 @@ def overview(request):
     cogs_plus_expense = cogs + expense
     net = "%.2f" % (income-cogs_plus_expense)
     title = "Overview"
-    return render_to_response('overview.html', locals(),context_instance=RequestContext(request))
+    return render_to_response('beancounter/overview.html', locals(),context_instance=RequestContext(request))
 
 
 @login_required
@@ -130,7 +130,7 @@ def history(request):
     for d,v in history.items():
         v['net'] = v['income'] - v['expense']
     title = 'History'
-    return render_to_response('history.html',locals(),context_instance=RequestContext(request))
+    return render_to_response('beancounter/history.html',locals(),context_instance=RequestContext(request))
         
 @login_required
 def incomeVsCost(request):
@@ -178,7 +178,7 @@ def incomeVsCost(request):
         cogsLabels += '{label: "' + i[1].name + '", v: ' + str(i[0]) + '}, '
     cogsLabels = cogsLabels.rstrip(', ')
     
-    return render_to_response('incomevscost.html',locals(),context_instance=RequestContext(request))
+    return render_to_response('beancounter/incomevscost.html',locals(),context_instance=RequestContext(request))
                 
 @login_required
 def moneyInMoneyOut(request):
@@ -223,7 +223,7 @@ def moneyInMoneyOut(request):
     sortby(incomeMash,1)
     expenseMash  = zip(epeepsList,expenseList)
     sortby(expenseMash,1)
-    return render_to_response('moneyin-moneyout.html',locals(),context_instance=RequestContext(request))
+    return render_to_response('beancounter/moneyin-moneyout.html',locals(),context_instance=RequestContext(request))
 
 @login_required
 def balance(request):
@@ -267,4 +267,4 @@ def balance(request):
         tally_labels += [this_tally_labels]
 
     title = 'Account Balances'
-    return render_to_response('account-balances.html',locals(),context_instance=RequestContext(request))            
+    return render_to_response('beancounter/account-balances.html',locals(),context_instance=RequestContext(request))            
