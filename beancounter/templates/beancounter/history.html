@@ -1,0 +1,64 @@
+{% extends "beancounter/generic-report.html" %}
+{% block title %}History Report | Bean Counter {% endblock %}
+{% block content %}
+<div id="content-main">
+
+
+
+
+<div class="stat-block">
+<h2>Income &amp; Expenses</h2>
+<table id="history-values" class="data">
+    <thead>
+        <tr><td>month</td><td>expenses</td><td>income</td><td>net</td></tr>
+    </thead>
+    <tbody>
+        {% for m,v in history.items %}
+            <tr>
+                <td class="label">{{ m|date:"M Y" }}</td> 
+                <td class="expense">${{ v.expense }}</td>
+                <td class="income">${{ v.income }}</td>
+                <td class="net">${{ v.net }}</td>
+            </tr>
+        {% endfor %}
+</tbody></table>
+</div>
+<div id="graph"></div>
+
+
+<script type="text/javascript">
+    var fv = get_data('history-values', {graph:'lines', values:['expense','income']});
+    fv.title = "History,{font-size: 20px;}";
+    fv.line_dot_3 = '3,#aaaaaa,Income,10,5';
+    fv.line_dot_2 = '3,#FFBFBF,Expenses,10,5';
+    fv.line_dot_4 = '3,#333333,Net,10,5';
+    fv.line_dot = '1,#66cc66,zero,10';
+    var inc = [];
+    $('td.income').each(function(i){
+       inc[i] = $(this).text().replace('$',''); 
+    });
+    var exp = [];
+    $('td.expense').each(function(i){
+       exp[i] = '-' + $(this).text().replace('$',''); 
+    });
+    var net = [];
+    $('td.net').each(function(i){
+       net[i] = $(this).text().replace('$',''); 
+    });
+    z = [];
+    $(net).each(function(i){
+        z[i] = 0;
+    });
+    union = inc.concat(exp.concat(net));
+    fv.y_max = String(max(union));
+    fv.y_min = String(min(union));
+    fv.x_label_style = '10,#000000,2,2';
+    fv.values_3 = inc.join(',');
+    fv.values_2 = exp.join(',');
+    fv.values_4 = net.join(',');
+    fv.values = z.join(',');
+    do_graph('graph', fv);
+</script>
+</div>
+{% endblock %}
+

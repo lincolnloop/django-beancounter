@@ -1,0 +1,113 @@
+{% extends "beancounter/generic-report.html" %}
+{% load mytags %}
+{% block title %}Account Balances Report | Bean Counter {% endblock %}
+{% block content %}
+<div id="content-main">
+
+
+
+
+<div class="stat-block">
+<h2>Accounts</h2>
+<table id="balance-values" class="data">
+    <thead>
+        <tr><td class="hide">id</td><td>day</td><td>account0</td></tr>
+    </thead>
+    <tbody>
+    
+        {% for t in tally.0 %}
+            
+            <tr><td class="hide">{{t.0}}</td> <td>{{t.1}}</td> <td>{{t.2}}</td></tr>
+        {% endfor %}
+</tbody></table>
+</div>
+<div class="graph"><canvas id="balance" width="500" height="300"></canvas></div>
+
+<hr />
+
+<div class="stat-block">
+<table id="balance-values1" class="data">
+    <thead>
+        <tr><td class="hide">id</td><td>day</td><td>account1</td></tr>
+    </thead>
+    <tbody>
+    
+        {% for t in tally.1 %}
+            
+            <tr><td class="hide">{{t.0}}</td> <td>{{t.1}}</td> <td>{{t.2}}</td></tr>
+        {% endfor %}
+</tbody></table>
+</div>
+<div class="graph"><canvas id="balance1" width="500" height="300"></canvas></div>
+
+
+<script type="text/javascript">
+function PTCoord(listvals)
+{
+this.listvals = listvals;
+
+var minval = listMin(this.listvals);
+var maxval = listMax(this.listvals);
+
+var interval;
+if (minval == maxval)
+interval = 10;
+else
+{
+interval = Math.pow(10, Math.floor(Math.log(maxval-minval)/Math.log(10)));
+}
+
+minval = Math.min(minval, this.roundDown(minval, interval));
+maxval = Math.max(maxval, this.roundUp(maxval, interval) + interval/2.0)
+
+this.minval = minval;
+this.maxval = maxval;
+this.interval = interval;
+
+v = [];
+var x = this.minval;
+while (x <= this.maxval)
+{
+v.push({v: x, label: x.toFixed(2)});
+x += this.interval;
+}
+this.ticks = v;
+}
+
+PTCoord.prototype.roundDown = function (val, bound) {
+return Math.floor(val / bound) * bound;
+};
+
+PTCoord.prototype.roundUp = function (val, bound) {
+return (Math.floor((val-1)/bound)+1) * bound;
+};
+
+PTCoord.prototype.getRange = function () {
+return [this.minval, this.maxval];
+};
+
+PTCoord.prototype.getTicks = function () {
+return this.ticks;
+};
+    var tallyLabels = [{{ tally_labels.0|safe }}];
+    var yCoord = new PTCoord([-0.38,-2057.81,-2062.81]);
+    var balance = new PTBarLayout({"xTicks" : tallyLabels,'yAxis': yCoord.getRange(),
+        'yTicks': yCoord.getTicks()});
+    balance.addDatasetFromTable("balance", $("balance-values"), xcol = 0, ycol = 2);
+    balance.evaluate();
+
+    var balanceGraph = new SweetCanvasRenderer($("balance"), balance);
+    balanceGraph.render();
+
+    var tallyLabels1 = [{{ tally_labels.1|safe }}];
+    var balance1 = new Layout("line", {"xTicks" : tallyLabels1});
+    balance1.addDatasetFromTable("balance1", $("balance-values1"), xcol = 0, ycol = 2);
+    balance1.evaluate();
+  
+    var balance1Graph = new SweetCanvasRenderer($("balance1"), balance1);
+    balance1Graph.render();
+
+</script>
+</div>
+{% endblock %}
+

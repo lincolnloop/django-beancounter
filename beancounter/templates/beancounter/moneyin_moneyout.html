@@ -1,0 +1,133 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block stylesheet %}{% load adminmedia %}{% admin_media_prefix %}css/dashboard.css{% endblock %}
+{% block extrahead %}
+<link href="http://localhost:9000/media/tests/tests.css" media="screen" rel="Stylesheet" type="text/css" />
+<script src="http://localhost:9000/media/js/MochiKit.js" type="text/javascript"></script>
+<script src="http://localhost:9000/media/js/excanvas.js" type="text/javascript"></script>
+<script src="http://localhost:9000/media/js/Base.js" type="text/javascript"></script>
+<script src="http://localhost:9000/media/js/Layout.js" type="text/javascript"></script>
+<script src="http://localhost:9000/media/js/Canvas.js" type="text/javascript"></script>
+<script src="http://localhost:9000/media/js/SweetCanvas.js" type="text/javascript"></script>
+{% endblock %}
+{% block coltype %}colMS{% endblock %}
+{% block bodyclass %}dashboard{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+{% block content %}
+<div id="content-main">
+<form action="./" method="get">
+	Month/Year: <select name="month">
+		{{ monthOptions }}
+	</select>/<select name="year">
+		{{ yearOptions }}</select> <br />
+	<input type="submit" value="Generate Report" />
+</form>
+<br />
+<div style="float:right;">
+<h2>Bottom Line = ${{net|floatformat:"2"}}</h2>
+<table id="total-values" class="data">
+    <thead>
+        <tr><td style="display:none">id</td><td>category</td><td>amount</td></tr>
+    </thead>
+    <tbody>
+		<tr><td style="display:none">0</td><td>Money In</td><td>{{income|floatformat:"2"}}</td></tr>
+		<tr><td style="display:none">1</td><td>Money Out</td><td>{{cogs_plus_expense|floatformat:"2"}}</td></tr>
+
+</tbody></table>
+</div>
+<div><canvas id="total" width="500" height="300"></canvas></div>
+
+<div style="float:right;">
+<h2>Income = ${{income|floatformat:"2"}}</h2>
+<table id="income-values" class="data">
+    <thead>
+        <tr><td style="display:none">id</td><td>category</td><td>amount</td></tr>
+    </thead>
+    <tbody>
+	{% for income in income_list %}
+		{% ifnotequal income.1 0 %}
+		<tr><td style="display:none">{{income.0.id}}</td><td>{{income.0.name}}</td><td>{{income.1|floatformat:"2"}}</td></tr>
+		{% endifnotequal %}
+	{% endfor %}
+</tbody></table>
+</div>
+<div><canvas id="income" width="500" height="300"></canvas></div>
+
+<br/>
+
+<div style="float:right;">
+<h2>Cost of Goods Sold = {{cogs|floatformat:"2"}}</h2>
+<table id="cogs-values" class="data">
+    <thead>
+        <tr><td style="display:none">id</td><td>category</td><td>amount</td></tr>
+    </thead>
+    <tbody>
+	{% for cogs in cogs_list %}
+		{% ifnotequal cogs.1 0 %}
+		<tr><td style="display:none">{{cogs.0.id}}</td><td>{{cogs.0.name}}</td><td>{{cogs.1|floatformat:"2"}}</td></tr>
+		{% endifnotequal %}
+	{% endfor %}
+</tbody></table>
+</div>
+<div><canvas id="cogs" width="500" height="300"></canvas></div>
+
+
+<div style="float:right;">
+<h2>Expense = ${{expense|floatformat:"2"}}</h2>
+<table id="expense-values" class="data">
+    <thead>
+        <tr><td style="display:none">id</td><td>category</td><td>amount</td></tr>
+    </thead>
+    <tbody>
+	{% for expense in expense_list %}
+		{% ifnotequal expense.1 0 %}
+		<tr><td style="display:none">{{expense.0.id}}</td><td>{{expense.0.name}}</td><td>{{expense.1|floatformat:"2"}}</td></tr>
+		{% endifnotequal %}
+	{% endfor %}
+</tbody></table>
+</div>
+<div><canvas id="expense" width="500" height="300"></canvas></div>
+
+
+
+
+
+
+<script type="text/javascript">
+	
+	var totalLabels = [{label: 'Money In', v: 0}, {label: 'Money Out', v: 1}];
+    var total = new Layout("bar", {'xTicks' : totalLabels});
+    total.addDatasetFromTable("dataset1", $("total-values"), xcol = 0, ycol = 2);
+    total.evaluate();
+
+	var incomeLabels = [{{income_labels}}];
+   	var income = new Layout("pie", {"xTicks" : incomeLabels} );
+    income.addDatasetFromTable("dataset1", $("income-values"), xcol = 0, ycol = 2);
+    income.evaluate();
+
+	var cogsLabels = [{{cogs_labels}}];
+	var cogs = new Layout("pie", {"xTicks" : cogsLabels});
+    cogs.addDatasetFromTable("dataset1", $("cogs-values"), xcol = 0, ycol = 2);
+    cogs.evaluate();
+
+	var expenseLabels = [{{expense_labels}}];
+	var expense = new Layout("pie", {"xTicks" : expenseLabels});
+    expense.addDatasetFromTable("dataset1", $("expense-values"), xcol = 0, ycol = 2);
+    expense.evaluate();
+
+
+    
+    var totalGraph = new SweetCanvasRenderer($("total"), total);
+    totalGraph.render();
+	var incomeGraph = new SweetCanvasRenderer($("income"), income);
+    incomeGraph.render();
+	var expenseGraph = new SweetCanvasRenderer($("expense"), expense);
+    expenseGraph.render();
+	var cogsGraph = new SweetCanvasRenderer($("cogs"), cogs);
+    cogsGraph.render();
+
+</script>
+</div>
+{% endblock %}
+

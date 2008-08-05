@@ -1,0 +1,74 @@
+{% extends "beancounter/generic-report.html" %}
+
+{% block title %}Money In/Money Out Report | Bean Counter {% endblock %}
+{% block content %}
+<div id="content-main">
+<form action="./" method="get">
+    Month/Year: <select name="month">
+        {{ monthOptions|safe }}
+    </select>/<select name="year">
+        {{ yearOptions|safe }}</select>
+    <input type="submit" value="Generate Report" />
+</form>
+<br />
+
+<div class="stat-block">
+<h2>Money comes from:</h2>
+<table id="income-values" class="data">
+    <thead>
+        <tr><td style="display:none">id</td><td>category</td><td>amount</td></tr>
+    </thead>
+    <tbody>
+    {% for inc in incomeMash %}
+        {% ifnotequal inc.1 0 %}
+        <tr><td style="display:none">{{inc.0.id}}</td><td>{{inc.0.name}}</td><td>{{inc.1|floatformat:"2"}}</td></tr>
+        {% endifnotequal %}
+    {% endfor %}
+</tbody></table>
+</div>
+<div class="graph"><canvas id="income" width="500" height="300"></canvas></div>
+
+<hr />
+
+<div class="stat-block">
+<h2>Money goes to:</h2>
+<table id="expense-values" class="data">
+    <thead>
+        <tr><td style="display:none">id</td><td>category</td><td>amount</td></tr>
+    </thead>
+    <tbody>
+    {% for exp in expenseMash %}
+        {% ifnotequal exp.1 0 %}
+        <tr><td style="display:none">{{exp.0.id}}</td><td>{{exp.0.name}}</td><td>{{exp.1|floatformat:"2"}}</td></tr>
+        {% endifnotequal %}
+    {% endfor %}
+</tbody></table>
+</div>
+<div class="graph"><canvas id="expense" width="500" height="300"></canvas></div>
+
+
+
+
+<script type="text/javascript">
+
+    var incomeLabels = [{{ iLabels|safe }}];
+       var income = new Layout("pie", {"xTicks" : incomeLabels} );
+    income.addDatasetFromTable("dataset1", $("income-values"), xcol = 0, ycol = 2);
+    income.evaluate();
+    
+    var expenseLabels = [{{ eLabels|safe }}];
+       var expense = new Layout("pie", {"xTicks" : expenseLabels} );
+    expense.addDatasetFromTable("dataset1", $("expense-values"), xcol = 0, ycol = 2);
+    expense.evaluate();
+  
+    var incomeGraph = new SweetCanvasRenderer($("income"), income);
+    incomeGraph.render();
+
+    var expenseGraph = new SweetCanvasRenderer($("expense"), expense);
+    expenseGraph.render();
+
+
+</script>
+</div>
+{% endblock %}
+
