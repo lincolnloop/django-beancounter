@@ -1,0 +1,150 @@
+from django.db import models
+
+# Create your models here.
+
+class Customer(models.Model):
+	BILLING_CHOICES = (
+		('EPN', 'ePN (auto-pay)'),
+		('MAIL', 'Mail Invoice'),
+	)
+	FREQUENCY_CHOICES =  (
+		('M', 'Monthly'),
+		('Y', 'Annually'),
+	)
+	first_name = models.CharField(maxlength=50)
+	last_name = models.CharField(maxlength=50)
+	company = models.CharField(null=True,blank=True,maxlength=50)
+	email = models.EmailField(null=True,blank=True)
+	phone = models.PhoneNumberField(null=True,blank=True)
+	billing_method = models.CharField(maxlength=5,choices=BILLING_CHOICES)
+	billing_frequency = models.CharField(maxlength=1,choices=FREQUENCY_CHOICES)
+	notes = models.TextField(null=True,blank=True)
+	
+		
+	class Meta:
+		ordering = ['company']
+			
+	def __str__(self):
+		if self.company == "":
+			return "%s, %s" % (self.last_name, self.first_name)
+		else:
+			return self.company
+
+	class Admin:
+		list_display = ('company', 'last_name', 'first_name', 'email', 'billing_method')
+
+class Package(models.Model):
+	package = models.CharField(maxlength=50)
+	default_price = models.FloatField(decimal_places=2,max_digits=6,null=True,blank=True)
+	
+	def __str__(self):
+		if self.default_price == "":
+			return "%s - $%.2f" % (self.package, self.default_price)
+		else:
+			return self.package
+		
+	class Admin:
+		list_display = ('package','default_price')
+		
+class Account(models.Model):
+	STATUS_CHOICES = (
+		('ON', 'Active'),
+		('OFF', 'Inactive'),
+		('DEL', 'Cancelled'),
+	)
+	customer = models.ForeignKey(Customer,edit_inline=models.STACKED,num_in_admin=1)
+	start_date = models.DateField(core=True)
+	package = models.ForeignKey(Package,core=True)
+	cpanel_username = models.CharField(maxlength=10,core=True)
+	cpanel_password = models.CharField(maxlength=30,core=True)
+	domain_name = models.CharField(maxlength=100,core=True)
+	monthly_cost = models.FloatField(decimal_places=2,max_digits=6,core=True)
+	status = models.TextField(choices=STATUS_CHOICES,maxlength=5,core=True)
+	last_bill = models.DateField(null=True,blank=True)
+	notes = models.TextField(null=True,blank=True)
+	
+	def annual_cost(self):
+		return "%.2f" % (12 * self.monthly_cost)
+	
+	def billing_method(self):
+		return self.customer.billing_method
+	def billing_frequency(self):
+		return self.customer.billing_frequency
+	
+	def __str__(self):
+		return self.domain_name
+
+	class Admin:
+		list_display = ('customer', 'domain_name', 'monthly_cost', 'package', 'start_date')
+		
+class Postini(models.Model):
+	customer = models.ForeignKey(Customer,edit_inline=models.STACKED,num_in_admin=1)
+	email_accounts = models.PositiveIntegerField(core=True)
+	domain_name = models.CharField(maxlength=100,core=True)
+	cost_per_account = 	models.FloatField(decimal_places=2,max_digits=3,core=True)
+	last_bill = models.DateField(null=True,blank=True)
+	
+	def total_cost(self):
+		return "%.2f" % (self.email_accounts * self.cost_per_account)
+		
+	def __str__(self):
+		return self.domain_name
+
+	class Admin:
+		list_display = ('customer', 'email_accounts', 'cost_per_account', 'total_cost')
+
+class LedgerAccount(models.Model):
+	TYPE_CHOICES = (
+		('INC', 'Income'),
+		('EXP', 'Expense'),
+		('COGS', 'Cost of Goods Sold'),
+	)
+	id = models.PositiveIntegerField('GL Number',primary_key=True)
+	account_type = models.CharField(maxlength=5,choices=TYPE_CHOICES)
+	account = models.CharField(maxlength=50)
+	
+	def __str__(self):
+		return "%s %s [%s]" % (self.account_type,self.account,self.id)
+	class Admin:
+		list_display = ('id','account_type','account')
+
+class Expense(models.Model):
+	category = models.ForeignKey(LedgerAccount)
+	date = models.DateField()
+	name = models.CharField(maxlength=50)
+	amount = models.FloatField(decimal_places=2,max_digits=6)
+	memo = models.CharField(maxlength=100,null=True,blank=True)
+	
+	def __str__(self):
+		return "$%.2f | %s | %s" % (self.amount,self.name,self.date)
+	
+	class Admin:
+		list_display = ('date', 'name', 'memo', 'category', 'amount')
+		date_hierarchy = 'date'
+                ordering = ('-date',)
+		search_fields = ('name','memo')
+		list_filter = ('category','name')
+	
+class Invoice(models.Model):
+	BILLING_CHOICES = (
+		('EPN', 'ePN (auto-pay)'),
+		('MAIL', 'Mail Invoice'),
+	)
+	id = models.AutoField('ID', primary_key=True)
+	date = models.DateField()
+	customer = models.ForeignKey(Customer)
+	category = models.ForeignKey(LedgerAccount)
+	detail = models.TextField()
+	total = models.FloatField(decimal_places=2,max_digits=6)
+	billing_method = models.CharField(maxlength=6,choices=BILLING_CHOICES)
+
+	def __str__(self):
+		return "%s | %s" % (self.id,self.customer)
+		
+	class Meta:
+		ordering = ['-date','customer']
+	
+	class Admin:
+		list_filter = ['billing_method','date','category']
+		date_hierarchy = 'date'
+		list_display = ('id','date','customer','detail','total','billing_method','category')
