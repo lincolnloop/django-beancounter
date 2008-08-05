@@ -6,8 +6,8 @@ TYPE_CHOICES = (
     ('COGS', 'Cost of Goods Sold'),
 )
 class Category(models.Model):
-    type = models.CharField(maxlength=4,choices=TYPE_CHOICES)
-    name = models.CharField(maxlength=50)
+    type = models.CharField(max_length=4,choices=TYPE_CHOICES)
+    name = models.CharField(max_length=50)
     income = models.ForeignKey('self', null=True, blank=True, limit_choices_to = {'type__exact':'INC'}, help_text='Use this to enable tracking your costs of goods vs. income')
 
     def __str__(self):
@@ -28,8 +28,8 @@ class Category(models.Model):
         )
     
 class BankAccount(models.Model):
-    type = models.CharField(maxlength=50,help_text='Checking, Savings, Credit, etc.')
-    name = models.CharField(maxlength=50)
+    type = models.CharField(max_length=50,help_text='Checking, Savings, Credit, etc.')
+    name = models.CharField(max_length=50)
     initial_balance = models.FloatField(null=True,blank=True)
     track_balance = models.BooleanField(help_text='Generate reports of the balance of this account over time.')
 
@@ -44,7 +44,7 @@ class AccountTransfer(models.Model):
     from_account = models.ForeignKey(BankAccount,related_name='transferred_from')
     to_account = models.ForeignKey(BankAccount,related_name='transferred_to')
     amount = models.FloatField()
-    memo = models.CharField(maxlength=100,null=True,blank=True)
+    memo = models.CharField(max_length=100,null=True,blank=True)
     def __str__(self):
         return "$%.2f from %s to %s" % (self.amount,self.from_account,self.to_account)
         
@@ -55,12 +55,12 @@ class AccountTransfer(models.Model):
         
         
 class Person(models.Model):
-    name = models.CharField(maxlength=100)
-    contact = models.CharField(maxlength=100,null=True,blank=True)
+    name = models.CharField(max_length=100)
+    contact = models.CharField(max_length=100,null=True,blank=True)
     phone = models.PhoneNumberField(null=True,blank=True)
     website = models.URLField(null=True,blank=True)
     email = models.EmailField(null=True,blank=True)
-    notes = models.CharField(maxlength=100,null=True,blank=True)
+    notes = models.CharField(max_length=100,null=True,blank=True)
     
     def __str__(self):
         return "%s" % (self.name)
@@ -79,7 +79,7 @@ class Entry(models.Model):
     name = models.ForeignKey(Person)
     amount = models.FloatField()
     bank_account = models.ForeignKey(BankAccount,related_name='paid_from',null=True,blank=True)
-    memo = models.CharField(maxlength=100,null=True,blank=True)
+    memo = models.CharField(max_length=100,null=True,blank=True)
     
     def __str__(self):
         return "$%.2f | %s | %s" % (self.amount,self.name,self.date)
