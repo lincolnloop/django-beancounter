@@ -1,5 +1,5 @@
 {% extends "beancounter/base.html" %}
-{% load beancounter %}
+{% load beancounter humanize %}
 {% block extrahead %}
     {{ block.super }}
     <script type="text/javascript" charset="utf-8">
@@ -53,12 +53,12 @@
             <tr><td>month</td><td>expenses</td><td>income</td><td>net</td></tr>
         </thead>
         <tbody>
-            {% for m,v in history.items reversed %}
+            {% for m,v in history.items %}
                 <tr>
                     <td class="label">{{ m|date:"M Y" }}</td> 
-                    <td class="expense">${{ v.expense }}</td>
-                    <td class="income">${{ v.income }}</td>
-                    <td class="net">${{ v.net }}</td>
+                    <td class="expense">${{ v.expense|intcomma }}</td>
+                    <td class="income">${{ v.income|intcomma }}</td>
+                    <td class="net">${{ v.net|intcomma }}</td>
                 </tr>
             {% endfor %}
         </tbody>

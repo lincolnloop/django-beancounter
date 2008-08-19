@@ -99,7 +99,7 @@ def history(request):
     Tally total expenses and income for each month
     """
     history = SortedDict()
-    entries = Entry.objects.all().order_by('date')
+    entries = Entry.objects.all().order_by('-date')
     for e in entries:
         
         # Create dict key
@@ -109,7 +109,7 @@ def history(request):
             
         #sum values for month
         if e.category.type in ['EXP', 'COGS']:
-            history[this_month]['expense'] += history[this_month]['expense']
+            history[this_month]['expense'] += e.amount
         elif e.category.type == 'INC':
              history[this_month]['income'] += e.amount
 
