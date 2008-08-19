@@ -3,60 +3,53 @@
 {% block title %}Overview Report | Bean Counter {% endblock %}
 {% block content %}
 <div id="content-main">
-<form action="./" method="get">
-    Month/Year: <select name="month">
-        {{ monthOptions|safe }}
-    </select>/<select name="year">
-        {{ yearOptions|safe }}</select>
+<form action="." method="get">
+    Month/Year: {{ form.month }}/{{ form.year }}
     <input type="submit" value="Generate Report" />
 </form>
 <br />
 <div class="stat-block">
-<h2>Bottom Line = ${{net|floatformat:"2"|intcomma}}</h2>
+<h2>Bottom Line = ${{ net|floatformat:"2"|intcomma }}</h2>
 <table id="total-values" class="data">
     <thead>
-        <tr><td class="hide">id</td><td>category</td><td class="hide">amt</td><td>amount</td></tr>
+        <td>category</td><td>amount</td></tr>
     </thead>
     <tbody>
-        <tr><td class="hide id">0</td><td class="label">Money In</td><td class="hide value">{{income|floatformat:"2"}}</td><td>{{income|floatformat:"2"|intcomma}}</td></tr>
-        <tr><td class="hide id">1</td><td class="label">Money Out</td><td class="hide value">{{cogs_plus_expense|floatformat:"2"}}</td><td>{{cogs_plus_expense|floatformat:"2"|intcomma}}</td></tr>
-
-</tbody></table>
+        <tr>
+            <td class="label">Money In</td>
+            <td>{{income|floatformat:"2"|intcomma}}</td>
+        </tr>
+        <tr>
+            <td class="label">Money Out</td>
+            <td>{{cogs_plus_expense|floatformat:"2"|intcomma}}</td>
+        </tr>
+    </tbody>
+</table>
 </div>
-<div id="total-graph">Graph</div>
-<script type="text/javascript">
-    var fv = get_data('total-values', {graph:'bar'});
-    fv.title = "Bottom+Line,{font-size: 20px;}";
-    fv.x_axis_steps = "2";
-    do_graph('total-graph', fv);
-    </script>
+<div id="total-graph"><!-- Graph --></div>
+
 <hr />
 
 <div class="stat-block">
 <h2>Income = ${{income|floatformat:"2"|intcomma}}</h2>
 <table id="income-values" class="data">
     <thead>
-        <tr><td class="hide">id</td><td>category</td><td class="hide">amt</td><td>amount</td></tr>
+        <tr>
+            <td>category</td>
+            <td>amount</td>
+        </tr>
     </thead>
     <tbody>
-    {% for i in income_list %}
-        {% if i.total %}
+    {% for k,v in income_list %}
         <tr>
-            <td class="hide id">{{ i.category.id }}</td>
-            <td class="label">{{ i.category.name }}</td>
-            <td class="hide value">{{ i.total|floatformat:"2" }}</td>
-            <td>${{ i.total|floatformat:"2"|intcomma }}</td>
+            <td class="label">{{ k }}</td>
+            <td>${{ v|intcomma }}</td>
         </tr>
-        {% endif %}
     {% endfor %}
-</tbody></table>
+    </tbody>
+</table>
 </div>
-<div id="income-graph">Graph</div>
-<script type="text/javascript">
-    var fv = get_data('income-values', {graph:'pie'});
-    fv.title = "Income,{font-size: 20px;}";
-    do_graph('income-graph', fv);
-</script>
+<div id="income-graph"><!-- Graph --></div>
 
 <hr />
 
@@ -64,27 +57,22 @@
 <h2>Cost of Goods Sold = ${{cogs|floatformat:"2"|intcomma}}</h2>
 <table id="cogs-values" class="data">
     <thead>
-        <tr><td class="hide">id</td><td>category</td><td class="hide">amt</td><td>amount</td></tr>
+        <tr>
+            <td>category</td>
+            <td>amount</td>
+        </tr>
     </thead>
     <tbody>
-    {% for c in cogs_list %}
-        {% if c.total %}
+    {% for k,v in cogs_list %}
         <tr>
-            <td class="hide id">{{ c.category.id }}</td>
-            <td class="label">{{ c.category.name }}</td>
-            <td class="hide value">{{ c.total|floatformat:"2" }}</td>
-            <td>${{ c.total|floatformat:"2"|intcomma }}</td>
+            <td class="label">{{ k }}</td>
+            <td>${{ v|intcomma }}</td>
         </tr>
-        {% endif %}
     {% endfor %}
-</tbody></table>
+    </tbody>
+</table>
 </div>
-<div id="cogs-graph"></div>
-<script type="text/javascript">
-    var fv = get_data('cogs-values', {graph:'pie'});
-    fv.title = "Cost of Goods Sold,{font-size: 20px;}";
-    do_graph('cogs-graph', fv);
-</script>
+<div id="cogs-graph"><!-- Graph --></div>
 
 <hr />
 
@@ -92,27 +80,22 @@
 <h2>Expense = ${{expense|floatformat:"2"|intcomma}}</h2>
 <table id="expense-values" class="data">
     <thead>
-        <tr><td class="hide">id</td><td>category</td><td class="hide">amt</td><td>amount</td></tr>
+        <tr>
+            <td>category</td>
+            <td>amount</td>
+        </tr>
     </thead>
     <tbody>
-    {% for e in expense_list %}
-        {% if e.total %}
+    {% for k,v in expense_list %}
         <tr>
-            <td class="hide id">{{ e.category.id }}</td>
-            <td class="label">{{ e.category.name }}</td>
-            <td class="hide value">{{ e.total|floatformat:"2" }}</td>
-            <td>${{ e.total|floatformat:"2"|intcomma }}</td>
+            <td class="label">{{ k }}</td>
+            <td>${{ v|intcomma }}</td>
         </tr>
-        {% endif %}
     {% endfor %}
-</tbody></table>
+    </tbody>
+</table>
 </div>
-<div id="expense-graph"></div>
-<script type="text/javascript">
-    var fv = get_data('expense-values', {graph:'pie'});
-    fv.title = "Expenses,{font-size: 20px;}";
-    do_graph('expense-graph', fv);
-</script>
+<div id="expense-graph"><!-- Graph --></div>
 
 
 </div>

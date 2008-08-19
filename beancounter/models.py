@@ -30,7 +30,7 @@ class Category(models.Model):
 class BankAccount(models.Model):
     type = models.CharField(max_length=50,help_text='Checking, Savings, Credit, etc.')
     name = models.CharField(max_length=50)
-    initial_balance = models.FloatField(null=True,blank=True)
+    initial_balance = models.DecimalField(max_digits=10, decimal_places=2, null=True,blank=True)
     track_balance = models.BooleanField(help_text='Generate reports of the balance of this account over time.')
 
     def __str__(self):
@@ -43,7 +43,7 @@ class AccountTransfer(models.Model):
     date = models.DateField()
     from_account = models.ForeignKey(BankAccount,related_name='transferred_from')
     to_account = models.ForeignKey(BankAccount,related_name='transferred_to')
-    amount = models.FloatField()
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
     memo = models.CharField(max_length=100,null=True,blank=True)
     def __str__(self):
         return "$%.2f from %s to %s" % (self.amount,self.from_account,self.to_account)
