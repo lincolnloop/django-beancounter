@@ -8,6 +8,8 @@
     <input type="submit" value="Generate Report" />
 </form>
 <br />
+
+<div id="graph" class="graph"><!-- Graph --></div>
 <div class="stat-block">
 <h2>Income Vs. Costs</h2>
 <table id="incomevscost-values" class="data">
@@ -31,9 +33,24 @@
     </tbody>
 </table>
 </div>
-<div id="graph"><!-- Graph --></div>
-<hr />
-
+<script type="text/javascript" charset="utf-8">
+        var totalData = [];
+        {% for t in totals %}
+        totalData.push({
+            label: '{{ t.cogs_category }}',
+            data: [[{{ forloop.counter }}, {{ t.balance }}]],
+        });
+        {% endfor %}
+        $.plot($('#graph'),
+            totalData, {
+                bars: { show:true },
+                yaxis: { min:0 },
+                xaxis: { tickSize: 5, tickFormatter: function(val, axis) { return ''; } },
+                grid: { borderWidth:0 },
+                //legend: { container:$('#total-values') }
+            }
+        );
+</script>
 </div>
 {% endblock %}
 
