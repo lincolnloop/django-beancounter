@@ -8,13 +8,13 @@
     <input type="submit" value="Generate Report" />
 </form>
 <br />
-<div id="total-graph" class="graph"><!-- Graph --></div>
+
+<!-- ********** TOTALS ********** -->
+<div id="total-graph" class="graph" style="height:300px"> <!-- Graph --></div>
 <div class="stat-block">
 <h2>Bottom Line = ${{ net|intcomma }}</h2>
 <div id="total-values" class="data"><!-- legend --></div>
 </div>
-
-
 <script type="text/javascript" charset="utf-8">
         $.plot($('#total-graph'),
             [
@@ -37,11 +37,9 @@
 
 
 
+<!-- ********** INCOME ********** -->
 
-
-<!-- INCOME -->
-
-<div id="income-graph" class="graph pie"><!-- Graph --></div>
+<div id="income-graph" class="graph pie" style="height:300px"><!-- Graph --></div>
 <div class="stat-block">
 <h2>Income = ${{ income|intcomma }}</h2>
 <div id="income-values" class="data"><!-- legend --></div>
@@ -69,8 +67,11 @@
         );
 </script>
 
-<hr />
-<div id="cogs-graph" class="graph pie"><!-- Graph --></div>
+
+
+<!-- ********** COGS ********** -->
+
+<div id="cogs-graph" class="graph pie" style="height:300px"><!-- Graph --></div>
 <div class="stat-block">
 <h2>Cost of Goods Sold = ${{cogs|intcomma}}</h2>
 <div id="cogs-values"><!-- legend --></div>
@@ -98,11 +99,12 @@
         );
 </script>
 
-<hr />
 
-<!-- INCOME -->
 
-<div id="expense-graph" class="graph pie"><!-- Graph --></div>
+
+<!-- ********** EXPENSE ********** -->
+
+<div id="expense-graph" class="graph pie" style="height:300px"><!-- Graph --></div>
 <div class="stat-block">
 <h2>Expense = ${{ expense|intcomma }}</h2>
 <div id="expense-values" class="data"><!-- legend --></div>
@@ -114,7 +116,6 @@
         label: '${{ v|intcomma }} - {{ k }}',
         data: {{ v }},
     });
-    i++;
     {% endfor %}
         $.plot($('#expense-graph'),
             expenseData, {

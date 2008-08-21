@@ -1,4 +1,4 @@
-.graph { width:100%; height:300px; float:left; clear:left; }
+.graph { width:500px; height:300px; float:left; clear:left; }
 .stat-block { position:relative; float:left; top:-300px; left:500px; padding-left:1em; width:25em; }
 .legend table { margin:0 auto; clear:left; }
 .pie { opacity:0.7; }
