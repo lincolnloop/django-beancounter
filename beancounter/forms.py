@@ -33,9 +33,42 @@ class DateForm(forms.Form):
     month = forms.ChoiceField(choices=MONTH_CHOICES)
     year = forms.ChoiceField(choices=YEAR_CHOICES)
     
-    def clean(self):
-        if self.cleaned_data.has_key('year'):
-            self.cleaned_data['year'] = int(self.cleaned_data['year'])
-        if self.cleaned_data.has_key('month'):
-            self.cleaned_data['month'] = int(self.cleaned_data['month'])
-        return self.cleaned_data
+    def __init__(self, *args, **kwargs):
+        super(DateForm, self).__init__(*args, **kwargs) 
+        today = datetime.date.today()
+        self.fields['month'].initial = str(today.month)
+        self.fields['year'].initial = str(today.year)
+        
+    
+    def start_end_date(self, month, year):
+        """
+        Return datetime objects for the start and end of the month. 
+        If month is 0 return start and end of year
+        """
+        year_start = year
+        year_end = year
+        if month == 0: #full year
+            month_start = 1
+            end = datetime.date(year_end, 12, 31)
+        else: #1 month
+            month_start = month
+            if month == 12:
+                month_end = 1
+                year_end = year + 1
+            else:
+                month_end = month + 1
+            end = datetime.date(year_end, month_end, 1)
+        start = datetime.date(year_start, month_start, 1)
+        return start,end
+    
+    def get_date_range(self):
+        if self.is_valid():
+            month = self.cleaned_data['month']
+            year = self.cleaned_data['year']
+        else:
+            today = datetime.date.today()
+            month = today.month
+            year = today.year
+            self = DateForm({'month':month, 'year':year})
+        return self.start_end_date(int(month), int(year))
+

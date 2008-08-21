@@ -12,38 +12,14 @@ from django.contrib.auth.decorators import login_required
 
 from models import *
 from forms import DateForm
+
     
-def htmlDates(theMonth,theYear):
-    return ''
-    
-def build_dates(month, year):
-    """
-    Return datetime objects for the start and end of the month. 
-    If month is 0 return start and end of year
-    """
-    year_start = year
-    year_end = year
-    if month == 0: #full year
-        month_start = 1
-        end = datetime.date(year_end, 12, 31)
-    else: #1 month
-        month_start = month
-        if month == 12:
-            month_end = 1
-            year_end = year + 1
-        else:
-            month_end = month + 1
-        end = datetime.date(year_end, month_end, 1)
-    start = datetime.date(year_start, month_start, 1)
-    return start,end
-    
-def detail_for_type(month,year,cat_type):
+def detail_for_type(start, end, cat_type):
     """Get list of each category total for a given category type."""
-    categories = Category.objects.filter(type__exact=cat_type)
-    report_start,report_end = build_dates(month,year)
+    
     entries = Entry.objects.filter(
-                    date__gte=report_start, 
-                    date__lt=report_end, 
+                    date__gte=start, 
+                    date__lt=end, 
                     category__type=cat_type).order_by('category')
     category_dict = {}
     type_total = decimal.Decimal('0')
@@ -64,18 +40,15 @@ def detail_for_type(month,year,cat_type):
     
 @login_required
 def overview(request):
-    form = DateForm(request.GET)
-    if form.is_valid():
-        month = form.cleaned_data['month']
-        year = form.cleaned_data['year']
+    if request.GET.has_key('month') and request.GET.has_key('year'):
+        form = DateForm(request.GET)
     else:
-        today = datetime.date.today()
-        month = today.month
-        year = today.year
+        form = DateForm()
+    start, end = form.get_date_range()
     
-    income_list,income = detail_for_type(month, year,"INC")
-    cogs_list,cogs = detail_for_type(month, year,"COGS")
-    expense_list,expense = detail_for_type(month, year,"EXP")
+    income_list,income = detail_for_type(start, end,"INC")
+    cogs_list,cogs = detail_for_type(start, end,"COGS")
+    expense_list,expense = detail_for_type(start, end,"EXP")
     
     cogs_plus_expense = cogs + expense
     net = income - cogs_plus_expense
@@ -123,96 +96,91 @@ def history(request):
         
 @login_required
 def income_vs_cost(request):
-    try:
-        theMonth = int(request.GET['month'])
-        theYear = int(request.GET['year'])
-    except (KeyError):
-        theMonth = datetime.date.today().month
-        theYear = datetime.date.today().year
+    """
+    Return a list of dictionaries containing COGS and related INC spending
+    for the report time specified.
     
-    (monthOptions,yearOptions) = htmlDates(theMonth,theYear)
-    (report_start,report_end) = buildDates(theMonth,theYear)
-    cogsCats = Category.objects.filter(type__exact='COGS')
-    total = 0.00
-    linkNumber = 0
-    Totals = []
-    cTotals = []
-    iTotals = []
-    iCats = []
-    cogsLabels = ""
+    """
+    if request.GET.has_key('month') and request.GET.has_key('year'):
+        form = DateForm(request.GET)
+    else:
+        form = DateForm()
+    start, end = form.get_date_range()
+    
+    
+    cogs_categories = Category.objects.filter(type__exact='COGS')
+    totals = []
+    for cat in cogs_categories:
+        if cat.income: #this should be in the query
+            cogs_entries = Entry.objects.filter(date__gte=start,
+                                               date__lt=end,
+                                               category=cat)
+            cogs_total = decimal.Decimal('0')
+            #total for COGS category
+            for e in cogs_entries:
+                cogs_total += e.amount
 
-
-    for c in cogsCats:
-        cogsEntries = Entry.objects.filter(date__gte = report_start) & Entry.objects.filter(date__lt = report_end) &  Entry.objects.filter(category__id=c.id)
-        cSum = 0.00
-        #total for COGS category
-        for e in cogsEntries:
-            cSum = cSum + float(e.amount)
-        cTotals += [cSum]
-        iSum = 0.00
-        incomeEntries = Entry.objects.filter(date__gte = report_start) & Entry.objects.filter(date__lt = report_end) &  Entry.objects.filter(category__id=c.income.id)
-        #total for associated Income category
-        iCats += [c.income]
-        for i in incomeEntries:
-            iSum = iSum + float(i.amount)
-        iTotals += [iSum]
-        Totals += [iSum-cSum]
-        linkNumber = linkNumber +1
-    lN = range(7)
+        
+            income_total = decimal.Decimal('0')
+            income_entries = Entry.objects.filter(date__gte=start,
+                                                 date__lt=end,
+                                                 category=cat.income)
+            #total for associated Income category
+            for i in income_entries:
+                income_total += i.amount
+        
+            totals.append({
+                'cogs_category': cat.name,
+                'cogs_total': cogs_total,
+                'income_category': cat.income,
+                'income_total': income_total,
+                'balance': income_total - cogs_total,
+            })
     
-    cogsList = zip(lN,iCats,iTotals,cTotals,Totals)
-    sortby(cogsList,4)
-    h = 0
-    for i in cogsList:
-        cogsLabels += '{label: "' + i[1].name + '", v: ' + str(i[0]) + '}, '
-    cogsLabels = cogsLabels.rstrip(', ')
-    
-    return render_to_response('beancounter/incomevscost.html',locals(),context_instance=RequestContext(request))
+    return simple.direct_to_template(request,
+                                     template='beancounter/incomevscost.html',
+                                     extra_context={
+                                        'form':form,
+                                        'totals': totals,
+                                    })
                 
 @login_required
 def moneyin_moneyout(request):
-    try:
-        theMonth = int(request.GET['month'])
-        theYear = int(request.GET['year'])
-    except (KeyError):
-        theMonth = datetime.date.today().month
-        theYear = datetime.date.today().year
+    """
+    Return a list of dictionaries containing COGS and related INC spending
+    for the report time specified.
     
-    (monthOptions,yearOptions) = htmlDates(theMonth,theYear)
-    (report_start,report_end) = build_dates(theMonth,theYear)
+    """
+    if request.GET.has_key('month') and request.GET.has_key('year'):
+        form = DateForm(request.GET)
+    else:
+        form = DateForm()
+    start, end = form.get_date_range()
     
-    peeps = Person.objects.filter()
-    ipeepsList = []
-    incomeList = []
-    epeepsList = []
-    expenseList = []
-    iLabels = ""
-    eLabels = ""
-    for p in peeps:
-        iSum = 0.00
-        incomeEntries = Entry.objects.filter(date__gte = report_start) & Entry.objects.filter(date__lt = report_end) & Entry.objects.filter(category__type = 'INC') & Entry.objects.filter(name = p)
-        for i in incomeEntries:
-            iSum = iSum + float(i.amount)
-        if iSum > 0:
-            iLabels += '{label: "' + p.name + '", v: ' + str(p.id) + '}, '
-            ipeepsList += [p]
-            incomeList += [iSum]
+    entries = Entry.objects.filter(date__gte=start,
+                                   date__lt=end)
+             
+    income_dict = {}
+    expense_dict = {}                     
+    for e in entries:
+        if e.category in ['EXP', 'COGS']:
+            if expense_dict.has_key(e.name.name):
+                expense_dict[e.name.name] += e.amount
+            else:
+                expense_dict[e.name.name] = e.amount
+        elif e.category == 'INC':
+            if income_dict.has_key(e.name.name):
+                income_dict[e.name.name] += e.amount
+            else:
+                income_dict[e.name.name] = e.amount
             
-        eSum = 0.00
-        expenseEntries = Entry.objects.filter(date__gte = report_start) & Entry.objects.filter(date__lt = report_end) & Entry.objects.filter(Q(category__type = 'EXP') | Q(category__type = 'COGS')) & Entry.objects.filter(name = p)
-        for e in expenseEntries:
-            eSum = eSum + float(e.amount)
-        if eSum > 0:
-            eLabels += '{label: "' + p.name + '", v: ' + str(p.id) + '}, '
-            epeepsList += [p]
-            expenseList += [eSum]
-        
-        
-    incomeMash = zip(ipeepsList,incomeList)
-    sortby(incomeMash,1)
-    expenseMash  = zip(epeepsList,expenseList)
-    sortby(expenseMash,1)
-    return render_to_response('beancounter/moneyin-moneyout.html',locals(),context_instance=RequestContext(request))
+    return simple.direct_to_template(request,
+                                     template='beancounter/moneyin-moneyout.html',
+                                     extra_context={
+                                        'form':form,
+                                        'income': income_dict,
+                                        'expense': expense_dict,
+                                    })
 
 @login_required
 def balance(request):

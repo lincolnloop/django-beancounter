@@ -1,12 +1,10 @@
 {% extends "beancounter/base.html" %}
+{% load humanize %}
 {% block title %}Income vs. Cost Report | Bean Counter {% endblock %}
 {% block content %}
 <div id="content-main">
 <form action="." method="get">
-    Month/Year: <select name="month">
-        {{ monthOptions|safe }}
-    </select>/<select name="year">
-        {{ yearOptions|safe }}</select> 
+    Month/Year: {{ form.month }}/{{ form.year }}
     <input type="submit" value="Generate Report" />
 </form>
 <br />
@@ -14,20 +12,26 @@
 <h2>Income Vs. Costs</h2>
 <table id="incomevscost-values" class="data">
     <thead>
-        <tr><td class="hide">id</td><td>category</td><td>income</td><td>cost</td><td>net</td></tr>
+        <tr>
+            <td>category</td>
+            <td>income</td>
+            <td>cost</td>
+            <td>net</td>
+        </tr>
     </thead>
     <tbody>
-    {% for cogs in cogsList %}
-        <tr><td class="hide">{{cogs.0}}</td><td>{{cogs.1.name}}</td><td>{{cogs.2|floatformat:"2"}}</td><td>{{cogs.3|floatformat:"2"}}</td><td>{{cogs.4|floatformat:"2"}}</td></tr>
+    {% for t in totals %}
+        <tr>
+            <td>{{ t.cogs_category }}</td>
+            <td>${{ t.income_total|intcomma }}</td>
+            <td>${{ t.cogs_total|intcomma }}</td>
+            <td>{{ t.balance|intcomma }}</td>
+        </tr>
     {% endfor %}
-</tbody></table>
+    </tbody>
+</table>
 </div>
-<div id="graph">Graph</div>
-<script type="text/javascript">
-    var fv = get_data('incomevscost-values', {graph:'bar'});
-    fv.title = "Income Vs. Costs,{font-size: 20px;}";
-    do_graph('graph', fv);
-    </script>
+<div id="graph"><!-- Graph --></div>
 <hr />
 
 </div>
