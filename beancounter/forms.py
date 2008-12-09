@@ -1,6 +1,6 @@
 import datetime
 
-from django import newforms as forms
+from django import forms
 
 from models import Entry
 
@@ -23,7 +23,7 @@ MONTH_CHOICES = (
 this_year = datetime.date.today().year
 try:
     first_year = Entry.objects.all().order_by('date')[0].date.year
-except KeyError:
+except IndexError:
     first_year = this_year
 YEAR_CHOICES = []
 for year in range(first_year, this_year+1):

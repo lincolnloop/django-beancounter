@@ -2,20 +2,21 @@
 {% load i18n %}
 
 {% block stylesheet %}{% load adminmedia %}{% admin_media_prefix %}css/dashboard.css{% endblock %}
+
 {% block coltype %}colMS{% endblock %}
+
 {% block bodyclass %}dashboard{% endblock %}
+
 {% block breadcrumbs %}{% endblock %}
+
 {% block content %}
 <div id="content-main">
 
-{% load adminapplist %}
-
-{% get_admin_app_list as app_list %}
 {% if app_list %}
     {% for app in app_list %}
         <div class="module">
         <table summary="{% blocktrans with app.name as name %}Models available in the {{ name }} application.{% endblocktrans %}">
-        <caption>{% blocktrans with app.name as name %}{{ name }}{% endblocktrans %}</caption>
+        <caption><a href="{{ app.app_url }}" class="section">{% blocktrans with app.name as name %}{{ name }}{% endblocktrans %}</a></caption>
         {% for model in app.models %}
             <tr>
             {% if model.perms.change %}
@@ -103,7 +104,7 @@
             {% else %}
             <ul class="actionlist">
             {% for entry in admin_log %}
-            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">{% if not entry.is_deletion %}<a href="{{ entry.get_admin_url }}">{% endif %}{{ entry.object_repr|escape }}{% if not entry.is_deletion %}</a>{% endif %}<br /><span class="mini quiet">{% filter capfirst %}{% trans entry.content_type.name %}{% endfilter %}</span></li>
+            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">{% if not entry.is_deletion %}<a href="{{ entry.get_admin_url }}">{% endif %}{{ entry.object_repr }}{% if not entry.is_deletion %}</a>{% endif %}<br /><span class="mini quiet">{% filter capfirst %}{% trans entry.content_type.name %}{% endfilter %}</span></li>
             {% endfor %}
             </ul>
             {% endif %}

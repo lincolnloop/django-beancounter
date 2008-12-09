@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.localflavor.us.models import PhoneNumberField
 
 TYPE_CHOICES = (
     ('INC', 'Income'),
@@ -57,7 +58,7 @@ class AccountTransfer(models.Model):
 class Person(models.Model):
     name = models.CharField(max_length=100)
     contact = models.CharField(max_length=100,null=True,blank=True)
-    phone = models.PhoneNumberField(null=True,blank=True)
+    phone = PhoneNumberField(null=True,blank=True)
     website = models.URLField(null=True,blank=True)
     email = models.EmailField(null=True,blank=True)
     notes = models.CharField(max_length=100,null=True,blank=True)
