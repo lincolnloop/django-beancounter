@@ -1,5 +1,8 @@
+import datetime
+
 from django.db import models
 from django.contrib.localflavor.us.models import PhoneNumberField
+from tagging.fields import TagField
 
 TYPE_CHOICES = (
     ('INC', 'Income'),
@@ -63,16 +66,78 @@ class Person(models.Model):
     email = models.EmailField(null=True,blank=True)
     notes = models.CharField(max_length=100,null=True,blank=True)
     
-    def __str__(self):
-        return "%s" % (self.name)
+    def __unicode__(self):
+        return self.name
     
     class Meta:
         verbose_name_plural = 'People'
         ordering = ['name']
         
+        
+class Employee(Person):
+    PAYMENT_CHOICES = (
+        ('paypal', 'PayPal'),
+        ('check', 'Mail Check'),
+        ('wire', 'Wire Transfer'),
+        ('elance', 'Elance'),
+        ('other', 'Other'),
+    )
+    gmt_offset = models.DecimalField(max_digits=3, decimal_places=1)
+    skills = TagField()
+    payment_preference = models.CharField(blank=True, max_length=100, choices=PAYMENT_CHOICES)
+    payment_notes = models.TextField(blank=True)
+    contract = models.DateField(blank=True, null=True, help_text="Date contractor contract was signed and received.")
+    hourly_rate = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="If rate varies, enter average and note below.")
+    currency = models.CharField(default="USD", max_length=3)
+    rate_notes = models.TextField(blank=True, help_text="Additional notes regarding contractor rates.")
+
+
+    def timezone(self):
+        if self.gmt_offset == int(self.gmt_offset):
+            gmt_offset = int(self.gmt_offset)
+        else:
+            gmt_offset = self.gmt_offset
+        if gmt_offset > 0:
+            gmt_offset = '+%s' % gmt_offset
+        return 'GMT%s' % gmt_offset
+
+    def under_contract(self):
+        if self.contract:
+            return True
+        return False
+    under_contract.boolean = True
+
+    def rate(self):
+        return "%s %s" % (self.hourly_rate, self.currency)
+
+class Project(models.Model):
+    name = models.CharField(max_length=100)
+    employees = models.ManyToManyField(Employee)
+    start_date = models.DateField()
+    #bid = models.DecimalField(max_digits=8, decimal_places=2)
+    active = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return self.name
+        
+        
+class ProjectTime(models.Model):
+    """
+    Hours spent by an employee on a project
     
-    class Admin:
-        list_display = ('name','phone','email')
+    """
+    
+    employee = models.ForeignKey(Employee)
+    project = models.ForeignKey(Project)
+    start_date = models.DateField(default=datetime.date.today())
+    end_date = models.DateField(default=datetime.date.today())
+    hours = models.DecimalField(max_digits=6, decimal_places=3)
+    cost = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True, help_text="Leave blank to automatically calculate")
+    cost_converted = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True, help_text="Cost converted to local currency")
+
+    def __unicode__(self):
+        return "%s on %s (%s-%s)" % (self.employee, self.project, self.start_date, self.end_date)
+
 
 class Entry(models.Model):
     category = models.ForeignKey(Category)
