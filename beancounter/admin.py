@@ -30,7 +30,7 @@ class ProjectInvoiceInline(admin.TabularInline):
     model = ProjectInvoice
 
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name','start_date')
+    list_display = ('name','start_date', 'total_invoiced', 'total_cost', 'profit')
     inlines = [ProjectInvoiceInline,]
     
 class ProjectTimeAdmin(admin.ModelAdmin):

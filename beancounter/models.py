@@ -1,4 +1,5 @@
 import datetime
+import decimal
 
 from django.db import models
 from django.contrib.localflavor.us.models import PhoneNumberField
@@ -118,6 +119,24 @@ class Project(models.Model):
 
     def __unicode__(self):
         return self.name
+        
+    def total_invoiced(self):
+        #TODO aggregate support
+        total = decimal.Decimal("0.00")
+        for invoice in self.projectinvoice_set.all():
+            total += invoice.amount
+        return total
+    
+    def total_cost(self):
+        #TODO aggregate support
+        total = decimal.Decimal("0.00")
+        for time in self.projecttime_set.all():
+            total += time.cost_converted
+        return total
+    
+    def profit(self):
+        return self.total_invoiced() - self.total_cost()
+            
 
 class ProjectInvoice(models.Model):
     """
