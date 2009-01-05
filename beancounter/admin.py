@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from beancounter.models import (Category, BankAccount, AccountTransfer,
-                                Person, Entry, Employee, Project, ProjectTime)
+                                Person, Entry, Employee, Project, ProjectTime,
+                                ProjectInvoice)
 
 class CategoryOptions(admin.ModelAdmin):
     fieldsets = (
@@ -25,8 +26,12 @@ class EmployeeAdmin(admin.ModelAdmin):
     list_display = ('name', 'gmt_offset', 'rate')
     search_fields = ('name',)
 
+class ProjectInvoiceInline(admin.TabularInline):
+    model = ProjectInvoice
+
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ('name','start_date')
+    inlines = [ProjectInvoiceInline,]
     
 class ProjectTimeAdmin(admin.ModelAdmin):
     list_display = ('project', 'employee', 'hours', 'cost_converted')

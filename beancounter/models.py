@@ -82,7 +82,7 @@ class Employee(Person):
         ('elance', 'Elance'),
         ('other', 'Other'),
     )
-    gmt_offset = models.DecimalField(max_digits=3, decimal_places=1)
+    gmt_offset = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True)
     skills = TagField()
     payment_preference = models.CharField(blank=True, max_length=100, choices=PAYMENT_CHOICES)
     payment_notes = models.TextField(blank=True)
@@ -114,11 +114,22 @@ class Project(models.Model):
     name = models.CharField(max_length=100)
     employees = models.ManyToManyField(Employee)
     start_date = models.DateField()
-    bid = models.DecimalField(max_digits=8, decimal_places=2)
     active = models.BooleanField(default=True)
 
     def __unicode__(self):
         return self.name
+
+class ProjectInvoice(models.Model):
+    """
+    Invoice sent for project
+    
+    """
+    project = models.ForeignKey(Project)
+    date = models.DateField(default=datetime.date.today())
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    
+    def __unicode__(self):
+        return "$%s for %s on %s" % (self.amount, self.project, self.date)
         
         
 class ProjectTime(models.Model):

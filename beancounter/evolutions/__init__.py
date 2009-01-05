@@ -1,1 +1,5 @@
-SEQUENCE = ['add_bid',]
+SEQUENCE = [
+    'add_bid',
+    'blank_fields',
+    'delete_bid',
+]
