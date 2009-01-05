@@ -1,0 +1,1 @@
+SEQUENCE = ['add_bid',]

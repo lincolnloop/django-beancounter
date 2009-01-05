@@ -114,7 +114,7 @@ class Project(models.Model):
     name = models.CharField(max_length=100)
     employees = models.ManyToManyField(Employee)
     start_date = models.DateField()
-    #bid = models.DecimalField(max_digits=8, decimal_places=2)
+    bid = models.DecimalField(max_digits=8, decimal_places=2)
     active = models.BooleanField(default=True)
 
     def __unicode__(self):
