@@ -34,8 +34,9 @@ class ProjectAdmin(admin.ModelAdmin):
     inlines = [ProjectInvoiceInline,]
     
 class ProjectTimeAdmin(admin.ModelAdmin):
-    list_display = ('project', 'employee', 'hours', 'cost_converted')
+    list_display = ('employee', 'start_date', 'project', 'hours', 'cost', 'cost_converted')
     list_filter = ('project', 'employee')
+    date_hierarchy = 'start_date'
 
 class AccountTransferOptions(admin.ModelAdmin):
     list_display = ('date','amount','from_account','to_account')
