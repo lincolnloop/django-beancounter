@@ -113,7 +113,6 @@ class Employee(Person):
 
 class Project(models.Model):
     name = models.CharField(max_length=100)
-    employees = models.ManyToManyField(Employee)
     active = models.BooleanField(default=True)
 
     def __unicode__(self):
