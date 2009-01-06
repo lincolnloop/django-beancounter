@@ -29,9 +29,12 @@ class EmployeeAdmin(admin.ModelAdmin):
 class ProjectInvoiceInline(admin.TabularInline):
     model = ProjectInvoice
 
+class ProjectTimeInline(admin.TabularInline):
+    model = ProjectTime
+
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ('name', 'total_invoiced', 'total_cost', 'profit')
-    inlines = [ProjectInvoiceInline,]
+    inlines = [ProjectInvoiceInline, ProjectTimeInline]
     
 class ProjectTimeAdmin(admin.ModelAdmin):
     list_display = ('employee', 'start_date', 'project', 'hours', 'cost', 'cost_converted')
