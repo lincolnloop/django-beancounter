@@ -114,7 +114,6 @@ class Employee(Person):
 class Project(models.Model):
     name = models.CharField(max_length=100)
     employees = models.ManyToManyField(Employee)
-    start_date = models.DateField()
     active = models.BooleanField(default=True)
 
     def __unicode__(self):
@@ -167,6 +166,13 @@ class ProjectTime(models.Model):
 
     def __unicode__(self):
         return "%s on %s (%s-%s)" % (self.employee, self.project, self.start_date, self.end_date)
+    
+    def save(self, force_insert=False, force_update=False):
+        if not self.cost:
+            self.cost = self.hours * self.employee.hourly_rate
+        if not self.cost_converted and self.employee.currency == "USD":
+            self.cost_converted = self.cost
+        super(ProjectTime, self).save(force_insert, force_update)
 
 
 class Entry(models.Model):
