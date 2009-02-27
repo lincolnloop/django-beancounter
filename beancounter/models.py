@@ -88,7 +88,7 @@ class Employee(Person):
     payment_preference = models.CharField(blank=True, max_length=100, choices=PAYMENT_CHOICES)
     payment_notes = models.TextField(blank=True)
     contract = models.DateField(blank=True, null=True, help_text="Date contractor contract was signed and received.")
-    hourly_rate = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="If rate varies, enter average and note below.")
+    hourly_rate = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True, help_text="If rate varies, enter average and note below.")
     currency = models.CharField(default="USD", max_length=3)
     rate_notes = models.TextField(blank=True, help_text="Additional notes regarding contractor rates.")
 
