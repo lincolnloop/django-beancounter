@@ -88,7 +88,7 @@ class Employee(Person):
     payment_preference = models.CharField(blank=True, max_length=100, choices=PAYMENT_CHOICES)
     payment_notes = models.TextField(blank=True)
     contract = models.DateField(blank=True, null=True, help_text="Date contractor contract was signed and received.")
-    hourly_rate = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="If rate varies, enter average and note below.")
+    hourly_rate = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True, help_text="If rate varies, enter average and note below.")
     currency = models.CharField(default="USD", max_length=3)
     rate_notes = models.TextField(blank=True, help_text="Additional notes regarding contractor rates.")
 
@@ -115,6 +115,9 @@ class Project(models.Model):
     name = models.CharField(max_length=100)
     active = models.BooleanField(default=True)
 
+    class Meta:
+        ordering = ['-active', 'name']
+
     def __unicode__(self):
         return self.name
         
@@ -129,7 +132,9 @@ class Project(models.Model):
         #TODO aggregate support
         total = decimal.Decimal("0.00")
         for time in self.projecttime_set.all():
-            total += time.cost_converted
+           #this test should be in the filter above 
+           if time.cost_converted:
+                total += time.cost_converted
         return total
     
     def profit(self):
@@ -162,6 +167,9 @@ class ProjectTime(models.Model):
     hours = models.DecimalField(max_digits=6, decimal_places=3)
     cost = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True, help_text="Leave blank to automatically calculate")
     cost_converted = models.DecimalField(max_digits=9, decimal_places=2, blank=True, null=True, help_text="Cost converted to local currency")
+
+    class Meta:
+        ordering = ['-start_date', 'project']
 
     def __unicode__(self):
         return "%s on %s (%s-%s)" % (self.employee, self.project, self.start_date, self.end_date)
